@@ -1,0 +1,24 @@
+# Dependencies and build output are recreated inside the image
+node_modules
+dist
+generated
+coverage
+*.tsbuildinfo
+
+# Real secrets must never enter the image
+.env
+.env.*
+!.env.example
+
+# Not needed to run the API
+.git
+.gitignore
+test
+scripts
+*.sh
+README.md
+docker-compose.yml
+Dockerfile
+.dockerignore
+.vscode
+*.log

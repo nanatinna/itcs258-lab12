@@ -1,0 +1,24 @@
+{
+  "moduleFileExtensions": [
+    "js",
+    "json",
+    "ts"
+  ],
+  "rootDir": "..",
+  "testEnvironment": "node",
+  "testRegex": "test/.*\\.e2e-spec\\.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": [
+      "ts-jest",
+      {
+        "tsconfig": "<rootDir>/tsconfig.spec.json"
+      }
+    ]
+  },
+  "transformIgnorePatterns": [
+    "node_modules/(?!(@nestjs/(cache-manager|jwt|passport|mapped-types)|cache-manager|keyv|@keyv|@cacheable|cacheable|hookified|hashery|qified)/)"
+  ],
+  "moduleNameMapper": {
+    "^(\\.{1,2}/.*)\\.js$": "$1"
+  }
+}

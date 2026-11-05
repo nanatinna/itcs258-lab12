@@ -1,0 +1,54 @@
+# Lab 12 - nest-prisma-lab: NestJS API + MySQL + Redis
+name: nest-prisma-${STUDENT_ID:?Set STUDENT_ID in .env}
+
+services:
+  api:
+    build: .
+    ports:
+      - "127.0.0.1:8086:3000"          # laptop 8086 -> container 3000
+    environment:
+      PORT: "3000"
+      # "db" and "redis" are Compose service names, not localhost
+      DATABASE_URL: mysql://${MYSQL_USER:?Set MYSQL_USER}:${MYSQL_PASSWORD:?Set MYSQL_PASSWORD}@db:3306/${MYSQL_DATABASE:?Set MYSQL_DATABASE}?allowPublicKeyRetrieval=true
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET}
+      JWT_EXPIRES_IN_SECONDS: "3600"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 15s
+
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:?Set MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER:?Set MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD}
+    volumes:
+      - mysqldata:/var/lib/mysql                                    # named volume: keeps data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro    # bind mount: creates tables once
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  mysqldata:
